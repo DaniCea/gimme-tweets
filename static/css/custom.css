@@ -1,0 +1,113 @@
+#subtitle {
+	font-weight: 100;
+}
+
+::-webkit-input-placeholder { /* WebKit browsers */
+    font-weight: 100;
+}
+:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+   font-weight: 100;
+   opacity:  1;
+}
+::-moz-placeholder { /* Mozilla Firefox 19+ */
+   font-weight: 100;
+   opacity:  1;
+}
+:-ms-input-placeholder { /* Internet Explorer 10+ */
+   font-weight: 100;
+}
+
+div.search i {
+	color: #5d5d5d;
+	-webkit-border-radius: 0px 5px 5px 0px;
+	border-radius: 0px 5px 5px 0px;
+	-webkit-box-shadow: inset 0px 0px 2px 0px rgba(0, 0, 0, 0.3);
+	box-shadow: inset 0px 0px 2px 0px rgba(0, 0, 0, 0.3);
+	background: #fff;
+	position: relative;
+}
+
+div.search i#start {
+	font-size: 40px;
+	top: 5.5px;
+	padding: 4px 20px 5px 20px;
+	margin-left: -4px;
+}
+
+div.search i#start.disabled {
+	color: #aaa;
+	cursor: default;
+}
+
+div.search i#start.enabled {
+	color: rgb(109, 210, 109);
+	cursor: pointer;
+}
+
+div.search input[type="text"] {
+	height: 49px;
+	-webkit-border-radius: 5px 0px 0px 5px;
+	border-radius: 5px 0px 0px 5px;
+	border: 0px;
+	background: #fff;
+	padding: 0 15px;
+	font-size: 22px;
+	-webkit-box-shadow: inset 0px 0px 2px 0px rgba(0, 0, 0, 0.3);
+	box-shadow: inset 0px 0px 2px 0px rgba(0, 0, 0, 0.3);
+	width: 50%;
+	margin-bottom: 20px;
+}
+
+#tweets {
+    display: table;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    background-size: cover;
+    -o-background-size: cover;
+}
+
+
+body {
+	color: #222;
+};
+
+
+.form-control:focus {
+    border-color: #cccccc;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}
+
+.img-thumbnail {
+	margin-top: 25%;
+	padding: 0px;
+	border: 1px solid #000;
+	border-radius: 0px;
+}
+
+h3 {
+	font-size: 20px;
+	margin-top: 10px;
+}
+
+hr {
+	margin-top: 10px;
+	margin-bottom: 10px;
+}
+
+textarea:hover, 
+input:hover, 
+textarea:active, 
+input:active, 
+textarea:focus, 
+input:focus,
+button:focus,
+button:active,
+button:hover
+{
+    outline:0px !important;
+    -webkit-appearance:none;
+}
