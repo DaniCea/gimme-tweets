@@ -1,24 +1,21 @@
-from flask import Flask, render_template
-from flask.ext.socketio import SocketIO, emit
+import logging
+import tornado.escape
+import tornado.ioloop
+import tornado.web
+import tornado.websocket
+import os.path
+import uuid
 
 import os
 import tweepy
 import json
 
-# Variable that holds the running stream
-stream = None
-track = None
+from tornado.concurrent import Future
+from tornado import gen
+from tornado.options import define, options, parse_command_line
 
-# This is the listener, resposible for receiving data
-class StdOutListener(tweepy.StreamListener):
-    def on_data(self, data):
-        # Twitter returns data in JSON format - we need to decode it first
-        decoded = json.loads(data)
-        print 'New tweet'
-        socketio.emit('tweet', decoded, namespace='/tweets');
-
-    def on_error(self, status):
-        print status
+# Web Server port to listen
+define("port", default=5000, help="run on the given port", type=int)
 
 # Twitter authentication details
 consumer_key = 'QULl7GNb5JKzwKznevMZmQ'
@@ -26,13 +23,71 @@ consumer_secret = 'tKbUP8DqcjjYgl9Ih0sIt6TNPebTNdgkCoWJ0qfW9Sc'
 access_token = '2353070090-LjkVD41lVcR8dqNb2gg29IIFqpySSYHmgioEB0D'
 access_token_secret = 'VoZS0ENHbtgNhVTvvWgaMAp4Nsc2grcdhXGkP91VSSML5'
 
-app = Flask(__name__)
-app.config['SECRET_KEY'] = 'secret!'
-socketio = SocketIO(app)
-
 # Tweepy config
 auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
 auth.set_access_token(access_token, access_token_secret)
+
+# Global variables
+stream = None
+track = None
+
+# Listener responsible to receive the data from Twitter and sent it to the Stream Handler
+class StdOutListener(tweepy.StreamListener):
+	def on_data(self, data):
+		print 'New tweet'
+		StreamHandler.send_tweet(data)
+
+	def on_error(self, status):
+		print status
+
+
+class MainHandler(tornado.web.RequestHandler):
+    def get(self):
+        self.render("index.html")
+
+
+class StreamHandler(tornado.websocket.WebSocketHandler):
+	waiters = set()
+
+	def open(self):
+		print 'Client connected'
+		StreamHandler.waiters.add(self)
+		stopStream()
+
+	def on_message(self, data):
+		obj = tornado.escape.json_decode(data)
+		if obj["message"] == "start":
+			print 'New Stream received'
+			global track
+			track = obj["track"]
+			startStream(track)
+		
+		elif obj["message"] == "stop":
+			print 'Stop Stream received'
+			stopStream()
+
+		elif obj["message"] == "pause":
+			print 'Pause Stream received'
+			stopStream()
+
+		elif obj["message"] == "resume":
+			print 'Resume Stream received'
+			global track
+			startStream(track)
+
+	def on_close(self):
+		print 'Client disconnected'
+		StreamHandler.waiters.remove(self)
+		stopStream()
+
+	@classmethod
+	def send_tweet(cls, tweet):
+		obj = { "message": "newTweet", "tweet": tweet }
+		for waiter in cls.waiters:
+			try:
+				waiter.write_message(obj)
+			except:
+				logging.error("Error sending message", exc_info=True)
 
 # Stop Stream function
 def stopStream():
@@ -41,57 +96,33 @@ def stopStream():
 		stream.disconnect()
 		stream = None
 
+# Start Stream function
 def startStream(track):
 	global stream
 	stream = tweepy.Stream(auth, StdOutListener())
 	stream.filter(track=[track], async=True)
 
-# Route definition
-@app.route('/')
-def index():
-	return render_template('index.html')
-
-# Socket.io messages and responses
-@socketio.on('start', namespace='/tweets')
-def start(message):
-	print 'New Stream received'
-	global track
-	track = message
-	startStream(track)
-	emit('start-ack')
-
-@socketio.on('stop', namespace='/tweets')
-def stop():
-	print 'Stop Stream received'
-	stopStream()
-	emit('stop-ack')
-
-@socketio.on('pause', namespace='/tweets')
-def pause():
-	print 'Pause Stream received'
-	stopStream()
-	emit('pause-ack')
-
-@socketio.on('resume', namespace='/tweets')
-def resume():
-	print 'Resume Stream received'
-	global track
-	startStream(track)
-	emit('resume-ack')
+class Application(tornado.web.Application):
+    def __init__(self):
+        handlers = [
+            (r"/", MainHandler),
+            (r"/tweetsocket", StreamHandler),
+        ]
+        settings = dict(
+            template_path=os.path.join(os.path.dirname(__file__), "templates"),
+            static_path=os.path.join(os.path.dirname(__file__), "static"),
+        )
+        tornado.web.Application.__init__(self, handlers, **settings)
 
 
-@socketio.on('connect', namespace='/tweets')
-def connect():
-    print 'Client connected'
-    stopStream()
-
-@socketio.on('disconnect', namespace='/tweets')
-def disconnect():
-	print 'Client disconnected'
-	stopStream()
+def main():
+	tornado.options.parse_command_line()
+	app = Application()
+	app.listen(options.port)
+	tornado.ioloop.IOLoop.instance().start()
 
 if __name__ == '__main__':
 	try:
-		socketio.run(app)
+		main()
 	except KeyboardInterrupt:
 		os._exit(0)
