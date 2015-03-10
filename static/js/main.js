@@ -3,10 +3,6 @@ var socket = new WebSocket(url);
 
 var TWEET_LIMIT = 100;
 
-nunjucks.configure('views', {
-    autoescape: true
-});
-
 var running = false;
 var tweets = 0;
 
@@ -56,11 +52,11 @@ socket.onclose = function() {
 function start(event) {
     if ($(event.target).hasClass('disabled')) return;
     // Unhide tweet section
-    $('#tweets').show();
+    $('#screen2').show();
 
     // Scroll to it
     $("body").animate({
-            scrollTop: $('#tweets').offset().top
+            scrollTop: $('#screen2').offset().top
         }, 600, "swing", function() {
             // Send Start event and set local variables
             running = true;
@@ -71,20 +67,22 @@ function start(event) {
             socket.send(JSON.stringify(message));
 
         // Hide & cleanup header section
-        $(".header").hide(); $("#query").val(""); $("#start").addClass("disabled").removeClass("enabled");
+        $("#screen1").hide(); 
+        $("#query").val(""); 
+        $("#start").addClass("disabled").removeClass("enabled");
     });
 }
 
 function stop(event) {
-    $(".header").show();
+    $("#screen1").show();
     $("body").animate({
-        scrollTop: $('#tweets').offset().top
+        scrollTop: $('#screen2').offset().top
     }, 0);
     $("body").animate({
-        scrollTop: $(".header").offset().top
+        scrollTop: $("#screen1").offset().top
     }, 600, "swing", function() {
-        $('#tweets').hide();
-        $('#main').empty();
+        $('#screen2').hide();
+        $('#screen2_tweets').empty();
 
         // Reset pause button
         $('#pause').addClass('btn-warning').removeClass('btn-success');
@@ -119,11 +117,10 @@ function pause_or_resume(event) {
 
 function newTweet(tweet) {
     tweet = JSON.parse(tweet);
-    console.dir(tweet);
     ++tweets;
     var date = moment(tweet.created_at, "ddd MMM DD HH:mm:ss ZZ YYYY").format("h:mmA");
-    tweet.date = date;
-    $('#main').prepend(nunjucks.renderString('<div class="row tweet"><div class="col-sm-1"><a href="#" class="pull-right"><img src="{{ user.profile_image_url }}" class="img-thumbnail"></a></div><div class="col-sm-11"><h3>{{ user.name }}  <small>@{{ user.screen_name }} · {{ date }}</small></h3><h3>{{ text }}</h3></div></div><hr>', tweet));
+    var linked_text = Autolinker.link(tweet.text);
+    $('#screen2_tweets').prepend('<div class="row tweet"><div class="col-sm-1"><a href="#" class="pull-right"><img src="' + tweet.user.profile_image_url + '" class="tweet-profile_img"></a></div><div class="col-sm-11"><h3>' + tweet.user.name + ' <small>@' + tweet.user.screen_name + ' · ' + date + '</small></h3><h3>' + linked_text + '</h3></div></div><hr>');
 
     if (tweets > TWEET_LIMIT) {
         $('.tweet').last().remove()

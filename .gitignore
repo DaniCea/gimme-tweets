@@ -1,3 +1,5 @@
 venv/
 venv_mac/
-websocket/
+venv_laptop/
+TODO
+*.pyc
