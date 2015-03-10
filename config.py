@@ -1,14 +1,15 @@
 # Twitter settings
 twitter = {
-	"consumer_key": 'INSERT_CONSUMER_KEY_HERE',
-	"consumer_secret": 'INSERT_CONSUMER_SECRET_HERE',
-	"access_token": 'INSERT_ACCESS_TOKEN_HERE',
-	"access_token_secret": 'INSERT_ACCESS_TOKEN_SECRET_HERE'	
+	"consumer_key": 'QULl7GNb5JKzwKznevMZmQ',
+	"consumer_secret": 'tKbUP8DqcjjYgl9Ih0sIt6TNPebTNdgkCoWJ0qfW9Sc',
+	"access_token": '2353070090-LjkVD41lVcR8dqNb2gg29IIFqpySSYHmgioEB0D',
+	"access_token_secret": 'VoZS0ENHbtgNhVTvvWgaMAp4Nsc2grcdhXGkP91VSSML5'	
 }
 
 # ElasticSearch settings
 es = {
-	"server": 'INSERT_ELASTICSEARCH_URL_HERE',
+	"active": True,
+	"server": 'http://minerva.bsc.es:8089',
 	"index_settings": {
 	    "mappings" : {
 		    "tweet": {

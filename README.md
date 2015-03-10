@@ -1,13 +1,23 @@
-Gimme-tweets is a simple web server written in Python to obtain tweets about a topic in real-time, based on the Twitter Streaming API.
+Gimme-tweets is a simple web server written in Python to obtain tweets about a topic in real-time and store them in Elasticsearch (optional)
 
-To get it running, simply clone the repository, then install the requirements:
+To get it running:
 
-pip install -r requirements.txt
 
-To run the server:
 
-python app.py
+· Clone the repository
 
-The default port is set to 5000, so the server will be accesible using the following url:
+· Install the requirements:
+
+	pip install -r requirements.txt
+
+· Edit the config.py with your Twitter keys and, if you want to store tweets in ElasticSearch, set it to the URL of your ES instance (generally http://localhost:9200) and set "active" to True
+
+· Run the server:
+
+	python app.py
+
+
+
+The default port is set to 5000, so the server should be accesible using the following url:
 
 http://localhost:5000
